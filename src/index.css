@@ -1,0 +1,145 @@
+/* 1. Variables de Color (Tu Paleta) */
+:root {
+  --primary: #04C727;
+  --primary-hover: #0CF736;
+  --secondary: #A4A6A5;
+  --background-light: #E6E6E6;
+  --text-dark: #161a30;
+  --white: #ffffff;
+  --sidebar-bg: #113321;
+  --sidebar-hover: #1b4d32;
+  --sidebar-active: #ffffff;
+  --sidebar-active-text: #113321;
+  --dashboard-bg: #f8f9fa;
+  --dashboard-alter: #2b8652;
+}
+
+/* 2. Reseteo Básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* 3. Fondo y Centrado del Card */
+body {
+  /*background: url("./assets/fondo.jpg") center center / cover no-repeat; */
+  background-color: var(--dashboard-alter); /* Fondo general del panel */
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+}
+
+.auth-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--background-light);
+}
+
+/* 4. El Contenedor Principal (El Formulario Pequeño) */
+.auth-wrapper {
+  background: var(--white);
+  /* Un ancho máximo de 380px garantiza que sea un formulario compacto */
+  width: 100%;
+  max-width: 380px; 
+  padding: 40px 30px;
+  border-radius: 12px;
+  /* Sombra suave para darle elevación y elegancia */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); 
+  border: 1px solid rgba(164, 166, 165, 0.3); /* Un borde sutil usando tu color secundario */
+}
+
+/* 5. Estilos de los Inputs */
+.input-group label {
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.input-group > div {
+  transition: border-color 0.3s ease;
+}
+
+/* Efecto cuando el usuario hace clic (Focus) en el input */
+.input-group > div:focus-within {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(4, 199, 39, 0.1);
+}
+
+.input-group input::placeholder {
+  color: var(--secondary);
+  opacity: 0.7;
+}
+
+/* 6. Botones */
+.btn-primary {
+  width: 100%;
+  background-color: var(--primary);
+  color: var(--white);
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px); /* Pequeño salto al hacer hover */
+  box-shadow: 0 4px 12px rgba(4, 199, 39, 0.2);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* 7. Enlaces y Textos */
+a {
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--primary-hover) !important;
+}
+
+/* Ajustes finos para las transiciones de las vistas */
+.form-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.login-logo {
+  width: 80px;
+  height: auto;
+  margin-bottom: 16px;
+}
+
+.login-subtitle {
+  margin-top: 8px;
+  margin-bottom: 24px;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+/* Animación suave al cambiar de Login a OTP, Register, etc. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
