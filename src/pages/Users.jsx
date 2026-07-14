@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { IoAddOutline, IoCloseOutline, IoPencilOutline, IoRefreshOutline } from 'react-icons/io5';
+import { IoAddOutline, IoCloseOutline, IoPencilOutline, IoRefreshOutline, IoPeopleOutline } from 'react-icons/io5';
 import { apiFetch } from '../services/api'; 
 
-export default function Collaborators() {
-  const [collaborators, setCollaborators] = useState([]);
+export default function Users() {
+  const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState('');
@@ -15,7 +15,7 @@ export default function Collaborators() {
   // Datos para el cambio de rol
   const [selectedUserId, setSelectedUserId] = useState('');
   const [selectedUserName, setSelectedUserName] = useState('');
-  const [selectedRoleId, setSelectedRoleId] = useState('3'); 
+  const [selectedRoleId, setSelectedRoleId] = useState('1'); // Por defecto TENANT_ADMIN para esta vista
 
   // Estado del Formulario de Registro
   const [formData, setFormData] = useState({
@@ -28,18 +28,19 @@ export default function Collaborators() {
   });
 
   useEffect(() => {
-    fetchCollaborators();
+    fetchUsers();
   }, []);
 
-  const fetchCollaborators = async () => {
+  const fetchUsers = async () => {
     setIsFetching(true);
     try {
-      const response = await apiFetch('/api/Admin/collaborators', {
+      // Ajustado al nuevo endpoint GET
+      const response = await apiFetch('/api/Admin/system/users', {
         method: 'GET'
       });
-      setCollaborators(response.contentData || []);
+      setUsers(response.contentData || []);
     } catch (err) {
-      console.error("Error cargando colaboradores:", err.message);
+      console.error("Error cargando usuarios:", err.message);
     } finally {
       setIsFetching(false);
     }
@@ -53,11 +54,11 @@ export default function Collaborators() {
     const normalizedStatus = status?.toLowerCase();
     
     switch (normalizedStatus) {
-      case 'active': case 'activo': return { ...baseStyle, backgroundColor: '#81D834' }; // Verde
-      case 'pendingverification': return { ...baseStyle, backgroundColor: '#1A9CDA' }; // Azul
-      case 'under revision': return { ...baseStyle, backgroundColor: '#F8C134' }; // Amarillo oscuro
-      case 'inactive': case 'inactivo': return { ...baseStyle, backgroundColor: '#A4A6A5' }; // Gris
-      case 'banned': case 'baneado': return { ...baseStyle, backgroundColor: '#F40000' }; // Rojo
+      case 'active': case 'activo': return { ...baseStyle, backgroundColor: '#81D834' };
+      case 'pendingverification': return { ...baseStyle, backgroundColor: '#1A9CDA' };
+      case 'under revision': return { ...baseStyle, backgroundColor: '#F8C134' };
+      case 'inactive': case 'inactivo': return { ...baseStyle, backgroundColor: '#A4A6A5' };
+      case 'banned': case 'baneado': return { ...baseStyle, backgroundColor: '#F40000' };
       default: return { ...baseStyle, backgroundColor: 'var(--secondary)' };
     }
   };
@@ -86,17 +87,18 @@ export default function Collaborators() {
     setIsLoading(true);
 
     try {
-      const response = await apiFetch('/api/User/register/new-tenant', {
+      // Ajustado al nuevo endpoint POST
+      const response = await apiFetch('/api/Admin/register/new-admin-tenat', {
         method: 'POST',
         body: JSON.stringify(formData)
       });
 
       if (response.contentData) {
-        setCollaborators([...collaborators, response.contentData]);
+        setUsers([...users, response.contentData]);
       }
       setIsAddModalOpen(false);
     } catch (err) {
-      setError(err.message || 'Error al registrar el usuario.');
+      setError(err.message || 'Error al registrar el usuario administrador.');
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +108,7 @@ export default function Collaborators() {
   const openRoleModal = (user) => {
     setSelectedUserId(user.userId);
     setSelectedUserName(user.userName);
-    setSelectedRoleId('3'); 
+    setSelectedRoleId('1'); 
     setError('');
     setIsRoleModalOpen(true);
   };
@@ -125,7 +127,7 @@ export default function Collaborators() {
         })
       });
 
-      await fetchCollaborators();
+      await fetchUsers();
       setIsRoleModalOpen(false);
     } catch (err) {
       setError(err.message || 'Error al actualizar el rol.');
@@ -138,15 +140,17 @@ export default function Collaborators() {
     <div style={styles.container}>
       <div style={styles.header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <h2 style={{ color: 'var(--sidebar-bg)', margin: 0 }}>Collaborator Details</h2>
-          <button style={styles.refreshBtn} onClick={fetchCollaborators} disabled={isFetching}>
+          <h2 style={{ color: 'var(--sidebar-bg)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <IoPeopleOutline /> System Users
+          </h2>
+          <button style={styles.refreshBtn} onClick={fetchUsers} disabled={isFetching}>
             <IoRefreshOutline style={{ animation: isFetching ? 'spin 1s linear infinite' : 'none' }} />
           </button>
         </div>
         
         <button style={styles.addButton} onClick={openAddModal}>
           <IoAddOutline style={{ fontSize: '1.2rem', marginRight: '5px' }} />
-          Add Collaborator
+          Add Admin Tenant
         </button>
       </div>
 
@@ -154,7 +158,7 @@ export default function Collaborators() {
         <table style={styles.table}>
           <thead>
             <tr>
-              <th style={styles.th}>Collaborator</th>
+              <th style={styles.th}>User</th>
               <th style={styles.th}>Email</th>
               <th style={styles.th}>Role</th>
               <th style={styles.th}>Headquarter</th>
@@ -163,12 +167,12 @@ export default function Collaborators() {
             </tr>
           </thead>
           <tbody>
-            {isFetching && collaborators.length === 0 ? (
-              <tr><td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>Cargando colaboradores...</td></tr>
-            ) : collaborators.length === 0 ? (
-              <tr><td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>No hay colaboradores registrados.</td></tr>
+            {isFetching && users.length === 0 ? (
+              <tr><td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>Cargando usuarios...</td></tr>
+            ) : users.length === 0 ? (
+              <tr><td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>No hay usuarios registrados.</td></tr>
             ) : (
-              collaborators.map((user) => (
+              users.map((user) => (
                 <tr key={user.userId} style={styles.tr}>
                   <td style={styles.td}>
                     <div style={styles.userCell}>
@@ -176,21 +180,14 @@ export default function Collaborators() {
                       <span style={{ fontWeight: '500', color: 'var(--text-dark)' }}>{user.userName}</span>
                     </div>
                   </td>
-                  
-                  {/* Se mapea la propiedad exacta del backend (con el error tipográfico incluido) */}
                   <td style={styles.td}>{user.emialUser}</td> 
-                  
-                  {/* Se mapea el rol que ahora sí envía el backend */}
                   <td style={styles.td}>
                     <span style={styles.roleText}>{user.roleUser}</span>
                   </td> 
-                  
                   <td style={styles.td}>N/D</td> 
-                  
                   <td style={styles.td}>
                     <span style={getStatusBadgeStyle(user.statusAccount)}>{user.statusAccount || 'Desconocido'}</span>
                   </td>
-                  
                   <td style={styles.td}>
                     <button type="button" style={styles.editBtn} onClick={() => openRoleModal(user)}>
                       <IoPencilOutline /> Rol
@@ -203,14 +200,12 @@ export default function Collaborators() {
         </table>
       </div>
 
-      {/* =========================================
-          MODAL 1: REGISTRO DE USUARIO
-          ========================================= */}
+      {/* MODAL 1: REGISTRO DE USUARIO */}
       {isAddModalOpen && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <h3 style={{ margin: 0, color: 'var(--sidebar-bg)' }}>Registrar Nuevo Usuario</h3>
+              <h3 style={{ margin: 0, color: 'var(--sidebar-bg)' }}>Registrar Admin Tenant</h3>
               <button type="button" style={styles.closeBtn} onClick={() => setIsAddModalOpen(false)}>
                 <IoCloseOutline />
               </button>
@@ -266,9 +261,7 @@ export default function Collaborators() {
         </div>
       )}
 
-      {/* =========================================
-          MODAL 2: ACTUALIZACIÓN DE ROL
-          ========================================= */}
+      {/* MODAL 2: ACTUALIZACIÓN DE ROL */}
       {isRoleModalOpen && (
         <div style={styles.modalOverlay}>
           <div style={{ ...styles.modalContent, maxWidth: '400px' }}>
@@ -284,11 +277,9 @@ export default function Collaborators() {
                 {error && (
                   <div style={styles.errorBox}>{error}</div>
                 )}
-                
                 <p style={{ color: 'var(--secondary)', fontSize: '0.9rem', marginBottom: '20px' }}>
                   Modificando accesos para: <strong>{selectedUserName}</strong>
                 </p>
-
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>Seleccionar Nuevo Rol</label>
                   <select 

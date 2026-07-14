@@ -16,34 +16,51 @@ export default function OtpForm({ onNavigate, flowContext }) {
     setIsError(false);
     setIsLoading(true);
 
-    const endpoint = flowContext === 'login' ? '/api/Auth/otp-login/verify' : '/api/Auth/otp-password/verify';
+    const endpoint = flowContext === 'login' 
+      ? '/api/Auth/otp-login/verify' 
+      : '/api/Auth/verify-reset-otp';
 
     try {
       const response = await apiFetch(endpoint, {
         method: 'POST',
-        body: JSON.stringify({ otpCode: otpCode }),
+        body: JSON.stringify({ otpCode: otpCode }), 
       });
-
-      setIsLoading(false);
-      setMessage(response.message); 
-      setIsError(false);
 
       if (flowContext === 'login') {
         if (response.contentData && response.contentData.accessToken) {
            localStorage.setItem('jwt_token', response.contentData.accessToken);
-        }    
+           
+           try {
+             const userResponse = await apiFetch('/api/User/user-data', { method: 'GET' });
+             if (userResponse.contentData && userResponse.contentData.roleUser) {
+               localStorage.setItem('user_role', userResponse.contentData.roleUser);
+             }
+           } catch (roleErr) {
+             console.error("Error al obtener el rol del usuario:", roleErr);
+           }
+        }
+        
+        // NOTA: NO ponemos setIsLoading(false) aquí. El botón se queda bloqueado.
+        setMessage(response.message); 
+        setIsError(false);
+
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/dashboard', { replace: true }); 
         }, 1500);
 
       } else if (flowContext === 'forgot') {
+        // NOTA: Tampoco ponemos setIsLoading(false) aquí.
+        setMessage(response.message); 
+        setIsError(false);
+        
         setTimeout(() => {
           onNavigate('reset');
         }, 1500);
       }
 
     } catch (err) {
-      setIsLoading(false);
+      // 2. SOLO DESBLOQUEAMOS EL BOTÓN SI HAY UN ERROR
+      setIsLoading(false); 
       setIsError(true);
       setMessage(err.message);
     }
